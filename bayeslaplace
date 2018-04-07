@@ -1,0 +1,109 @@
+import csv
+import math
+def comprob(str,val,dict,larg):
+    k=dict[str].count(val)
+    #拉普拉斯平滑公式，因为取值个数前六个特征有的是2有的是3，所以加一个列表存起来
+    return (k+1)/(len(dict[str])+laplacearg[larg-1])
+def comprobSpecial(str,val,dict):
+    ave=getaverage(dict,str)
+    var=getVar(dict,str)
+    arg1=(-1)*math.pow((float(val)-ave),2)/(2*var)
+    arg2=1/(pow((2*math.pi*var),0.5))
+    res=arg2*math.exp(arg1)
+    return res
+def getVar(d,str):
+    sum=0
+    i=0
+    aver=getaverage(d,str)
+    for di in d[str]:
+        sum=sum+math.pow((float(di)-aver),2)
+        i=i+1
+    return sum/i
+def getaverage(d,str):
+    sum=0
+    i=0
+    for di in d[str]:
+        sum=sum+float(di)
+        i=i+1
+    return  sum/i
+def getResult(l):
+    sum=1
+    for ll in l:
+        sum=sum*ll
+    return sum
+csv_file1=csv.reader(open("e:/train.csv",'r'))
+contentset=[]
+codict={'0':[],'1':[]}
+rodict={'0':[],'1':[]}
+kndict={'0':[],'1':[]}
+tedict={'0':[],'1':[]}
+umdict={'0':[],'1':[]}
+todict={'0':[],'1':[]}
+dendict={'0':[],'1':[]}
+sudict={'0':[],'1':[]}
+laplacearg=[3,3,3,2,3,2]
+labelist=[]
+labelval=[]
+final=[]
+#读进来
+for content in csv_file1:
+    contentset.append(content)
+#归来 哪些取值结果是0，哪些取值结果是1
+for i in range(1,len(contentset)):
+    labelist.append(contentset[i][9])
+    codict[contentset[i][9]].append(contentset[i][1])
+    rodict[contentset[i][9]].append(contentset[i][2])
+    kndict[contentset[i][9]].append(contentset[i][3])
+    tedict[contentset[i][9]].append(contentset[i][4])
+    umdict[contentset[i][9]].append(contentset[i][5])
+    todict[contentset[i][9]].append(contentset[i][6])
+    dendict[contentset[i][9]].append(contentset[i][7])
+    sudict[contentset[i][9]].append(contentset[i][8])
+for i in range(0,2):
+    labelval.append(labelist.count(str(i))/len(labelist))
+#先验概率p(y=0)p(y=1)
+csv_file2=csv.reader(open("e:/test.csv",'r'))
+linenum=1
+wrongres=0
+for csvline in csv_file2:
+    if(linenum==1):
+        linenum=linenum+1
+        continue
+    result0=[]
+    res=comprob('0',csvline[1],codict,1)
+    result0.append(res)
+    result0.append(comprob('0',csvline[2],rodict,2))
+    result0.append(comprob('0', csvline[3], kndict,3))
+    result0.append(comprob('0', csvline[4], tedict,4))
+    result0.append(comprob('0', csvline[5], umdict,5))
+    result0.append(comprob('0', csvline[6], todict,6))
+    result0.append(comprobSpecial('0', csvline[7], dendict))
+    result0.append(comprobSpecial('0', csvline[8], sudict))
+    res0=getResult(result0)*labelval[0]
+    result1=[]
+    result1.append(comprob('1', csvline[1], codict,1))
+    result1.append(comprob('1', csvline[2], rodict,2))
+    result1.append(comprob('1', csvline[3], kndict,3))
+    result1.append(comprob('1', csvline[4], tedict,4))
+    result1.append(comprob('1', csvline[5], umdict,5))
+    result1.append(comprob('1', csvline[6], todict,6))
+    result1.append(comprobSpecial('1', csvline[7], dendict))
+    result1.append(comprobSpecial('1', csvline[8], sudict))
+    res1=getResult(result1)*labelval[1]
+    cc=-1
+    if res0==max(res0,res1):
+        cc=0
+    else:
+        cc=1
+    if(str(cc)!=csvline[9]):
+        wrongres=wrongres+1
+    final.append(cc)
+    linenum=linenum+1
+    #计算=0情况下这个值的个数
+    # csvline[1]
+print('分类错误个数')
+print(wrongres)
+print('每个样例的预测结果')
+print(final)
+print('分类精度')
+print(1-wrongres/len(final))
