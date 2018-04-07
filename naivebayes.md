@@ -134,16 +134,6 @@ def comprob(str,val,dict,larg):
 
 拉普拉斯平滑公式，其中Oj表示j个特征值的取值个数，前六个特征取值个数并不相同，所以用列表存了下来
 
-### 实验结果
-
-- 必做部分
-
-  ![QQ图片20180402131313](C:\Users\Administrator\Desktop\QQ图片20180402131313.png)
-
-- 选作部分
-
-![choose](C:\Users\Administrator\Desktop\choose.png)
-
 ### 选作问题
 
 <u>为什么采用拉普拉斯平滑更合理？</u>
