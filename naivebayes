@@ -1,0 +1,111 @@
+import csv
+import math
+def comprob(str,val,dict):
+    #计算离散数据的概率
+    k=dict[str].count(val)
+    return k/len(dict[str])
+def comprobSpecial(str,val,dict):
+    #计算连续数据的概率
+    ave=getaverage(dict,str)
+    var=getVar(dict,str)
+    arg1=(-1)*math.pow((float(val)-ave),2)/(2*var)
+    arg2=1/(pow((2*math.pi*var),0.5))
+    res=arg2*math.exp(arg1)
+    return res
+def getVar(d,str):
+    #获得方差，为计算连续数据概率的函数调用
+    sum=0
+    i=0
+    aver=getaverage(d,str)
+    for di in d[str]:
+        sum=sum+math.pow((float(di)-aver),2)
+        i=i+1
+    return sum/i
+def getaverage(d,str):
+    #获得平均值，为计算连续数据概率的函数调用
+    sum=0
+    i=0
+    for di in d[str]:
+        sum=sum+float(di)
+        i=i+1
+    return  sum/i
+def getResult(l):
+    #将各个特征的概率相乘
+    sum=1
+    for ll in l:
+        sum=sum*ll
+    return sum
+csv_file1=csv.reader(open("e:/train.csv",'r'))
+contentset=[]
+codict={'0':[],'1':[]}
+rodict={'0':[],'1':[]}
+kndict={'0':[],'1':[]}
+tedict={'0':[],'1':[]}
+umdict={'0':[],'1':[]}
+todict={'0':[],'1':[]}
+dendict={'0':[],'1':[]}
+sudict={'0':[],'1':[]}
+labelist=[]
+labelval=[]
+final=[]
+#读进来
+for content in csv_file1:
+    contentset.append(content)
+#归来 哪些取值结果是0，哪些取值结果是1
+for i in range(1,len(contentset)):
+    labelist.append(contentset[i][9])#存结果0还是1，方便先验概率的计算
+    codict[contentset[i][9]].append(contentset[i][1])
+    rodict[contentset[i][9]].append(contentset[i][2])
+    kndict[contentset[i][9]].append(contentset[i][3])
+    tedict[contentset[i][9]].append(contentset[i][4])
+    umdict[contentset[i][9]].append(contentset[i][5])
+    todict[contentset[i][9]].append(contentset[i][6])
+    dendict[contentset[i][9]].append(contentset[i][7])
+    sudict[contentset[i][9]].append(contentset[i][8])
+for i in range(0,2):
+    labelval.append(labelist.count(str(i))/len(labelist))
+#先验概率p(y=0)p(y=1)
+csv_file2=csv.reader(open("e:/test.csv",'r'))
+linenum=1
+wrongres=0
+for csvline in csv_file2:
+    if(linenum==1):
+        linenum=linenum+1#第一行不读，是属性值啥的
+        continue
+    result0=[]
+    res=comprob('0',csvline[1],codict)
+    result0.append(res)
+    result0.append(comprob('0',csvline[2],rodict))
+    result0.append(comprob('0', csvline[3], kndict))
+    result0.append(comprob('0', csvline[4], tedict))
+    result0.append(comprob('0', csvline[5], umdict))
+    result0.append(comprob('0', csvline[6], todict))
+    result0.append(comprobSpecial('0', csvline[7], dendict))
+    result0.append(comprobSpecial('0', csvline[8], sudict))
+    res0=getResult(result0)*labelval[0]
+    result1=[]
+    result1.append(comprob('1', csvline[1], codict))
+    result1.append(comprob('1', csvline[2], rodict))
+    result1.append(comprob('1', csvline[3], kndict))
+    result1.append(comprob('1', csvline[4], tedict))
+    result1.append(comprob('1', csvline[5], umdict))
+    result1.append(comprob('1', csvline[6], todict))
+    result1.append(comprobSpecial('1', csvline[7], dendict))
+    result1.append(comprobSpecial('1', csvline[8], sudict))
+    res1=getResult(result1)*labelval[1]
+    cc=-1
+    #取概率更大的
+    if res0==max(res0,res1):
+        cc=0
+    else:
+        cc=1
+    if(str(cc)!=csvline[9]):#如果预测不符
+        wrongres=wrongres+1
+    final.append(cc)
+    linenum=linenum+1
+print('分类错误个数')
+print(wrongres)
+print('每个样例的预测结果')
+print(final)
+print('分类精度')
+print(1-wrongres/len(final))
